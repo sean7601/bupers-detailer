@@ -1,0 +1,55 @@
+<html>
+    <head>
+        <title>Detailer</title>
+    </head>
+    <!-- Need to bring all these into libraries eventually -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    
+    <!--libraries-->
+    <link href="utils/libraries/customCSS.css" rel="stylesheet">
+    <script src="utils/libraries/xlsx.full.min.js"></script>
+    <script src="utils/libraries/fileSaver.js"></script>
+    <script src="utils/libraries/lap.js"></script>
+    <script src="utils/libraries/munkres.js"></script>
+    <!--custom-->
+    <script src="utils/custom/mainPage.js"></script>
+    <script src="utils/custom/buildCommands.js"></script>
+    <script src="utils/custom/buildPeople.js"></script>
+    <script src="utils/custom/loadData.js"></script>
+    <script src="utils/custom/manualAssign.js"></script>
+    <script src="utils/custom/stableMatch.js"></script>
+    <script src="utils/custom/slate.js"></script>
+    <script src="utils/custom/optimalMatch.js"></script>
+    <body>
+        <div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom box-shadow">
+            <h5 class="my-0 mr-md-auto font-weight-normal">BUPERS Detailer Tool</h5>
+            <nav class="my-2 my-md-0 mr-md-3">
+              <a class="p-2 text-dark" href="#" onclick="mainPage.enter()">Main</a>
+
+            </nav>
+            <a class="btn btn-outline-primary" href="#">Help</a>
+          </div>
+      
+          <div id="header" class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+
+          </div>
+      
+          <div id="content" class="container text-center">
+
+          </div>
+    </body>
+    <script>
+        mainPage.enter()
+
+        /*
+        datastructures
+            buildPeople.people has all the data from people
+            slate.matches is all the acheived matches
+            
+
+
+        */
+    </script>
+</html>
