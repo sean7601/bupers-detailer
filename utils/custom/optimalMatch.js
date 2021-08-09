@@ -21,15 +21,9 @@ optimalMatch.findCommandIndex = function(command){
     return index;
 }
 
-optimalMatch.organizeData = function(lockins) {
+optimalMatch.organizeData = function(lockins,mustFill) {
 
-    //will need to pass this in
-    let mustFill = ["CPRW-11 WTU / INST req'd / Jacksonville, FL 2"]
-    mustFill.push("CPRW-10 WTU / INST req'd / Whidbey Island, WA 3");
-    mustFill.push("PERS-44 / Millington, TN");
-    mustFill.push("VUP-19 / MC req'd / Jacksonville, FL 5");
-    mustFill.push("FRS P-8A or P-3C Only / INST req'd / Jacksonville, FL 6");
-    mustFill.push("SERE Instructor / Kittery, ME");
+
     let data = JSON.parse(JSON.stringify(buildPeople.people));
     optimalMatch.matchData = [];
 

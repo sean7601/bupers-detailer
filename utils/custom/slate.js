@@ -44,7 +44,7 @@ slate.writeCommands = function(){
             <th>Name</th>
             <th>Billets Allowed</th>
             <th>Billets Allocated</th>
-            <th>Must Fill All</th>
+            <th>Must Fill</th>
             <th>Names</th>
         </tr>
 
@@ -54,6 +54,10 @@ slate.writeCommands = function(){
     for(let i = 0; i < buildPeople.people[0].preferences.length; i++){
         let theCommand = buildPeople.people[0].preferences[i].billet;
         let amountAllowed = buildPeople.people[0].preferences[i].quantity;
+        let mustFill = false;
+        if(slate.mustFills.includes(theCommand)){
+            mustFill = true;
+        }
         let peopleBilleted = slate.commands[theCommand];
         let numberPeopleBilleted
         let string;
@@ -88,11 +92,11 @@ slate.writeCommands = function(){
                 ${amountAllowed}
             </td>
             <td>`
-                if(true){
-                    html += `<input class="form-check-input ml-3" type="checkbox" id="${1}-lockedIn" checked>`
+                if(mustFill){
+                    html += `<input class="form-check-input ml-3 mustFill" onclick="slate.buildMustFills()" type="checkbox" id="${i}-mustFill" checked>`
                 }
                 else{
-                    html += `<input class="form-check-input ml-3" type="checkbox" id="${1}-lockedIn">`
+                    html += `<input class="form-check-input ml-3 mustFill" onclick="slate.buildMustFills()" type="checkbox" id="${i}-mustFill">`
                 }
             html += `</td>
             <td>
@@ -106,6 +110,18 @@ slate.writeCommands = function(){
     html += "</table>"
     $("#slate").html(html);
 
+}
+
+slate.buildMustFills = function(){
+    slate.mustFills = [];
+    for(let i = 0; i < buildPeople.people[0].preferences.length; i++){
+        let theCommand = buildPeople.people[0].preferences[i].billet;
+        let mustFill = $("#"+i+"-mustFill").is(':checked')
+        console.log(theCommand,mustFill);
+        if(mustFill){
+            slate.mustFills.push(theCommand)
+        }     
+    }
 }
 
 slate.writeStats = function(){
@@ -167,7 +183,7 @@ slate.writeSlate = function(){
                 ${theMatch.name}
             </td>
             <td>
-                <select class="form-control" style="min-width:300px" id="${person.name}-billet">`
+                <select class="form-control" onchange="slate.saveLockins()" style="min-width:300px" id="${person.name}-billet">`
                     for(let i = 0; i < person.preferences.length; i++){
                         let theBillet = person.preferences[i].billet;
                         let thePreference = person.preferences[i].pref;
@@ -180,10 +196,10 @@ slate.writeSlate = function(){
             </td>
             <td>`
                 if(person.lockedIn){
-                    html += `<input class="form-check-input ml-3" type="checkbox" id="${person.name}-lockedIn" checked>`
+                    html += `<input class="form-check-input ml-3" onclick="slate.saveLockins()"  type="checkbox" id="${person.name}-lockedIn" checked>`
                 }
                 else{
-                    html += `<input class="form-check-input ml-3" type="checkbox" id="${person.name}-lockedIn">`
+                    html += `<input class="form-check-input ml-3" onclick="slate.saveLockins()" type="checkbox" id="${person.name}-lockedIn">`
                 }
             html += `</td>
             <td>
@@ -203,6 +219,26 @@ slate.writeSlate = function(){
     slate.setToBilletedJob()
     slate.getImpactOfChange();
 
+}
+
+slate.saveLockins = function(){
+    var lockins = {}
+    //find out who is locked in
+    for(let i=0;i<buildPeople.people.length;i++){
+        let thisName = buildPeople.people[i].name;
+
+        let lockedIn = $("#"+thisName+"-lockedIn").is(':checked')
+        if(!lockedIn){
+            buildPeople.people[i].lockedIn = false;
+            continue;
+        }
+        else{
+            buildPeople.people[i].lockedIn = true;
+            lockins[thisName] = $("#"+thisName+"-billet").val()
+        }       
+    }
+
+    slate.lockins = lockins
 }
 
 slate.getImpactOfChange = function(){
@@ -294,6 +330,7 @@ slate.readFile = function(evt){
 
 
 slate.fullDataHandler = function(e) {
+    slate.mustFills = [];
     var files = e.target.files; // FileList object
     f = files[0];
     let extension = files[0].name.split('.').pop().toLowerCase()
@@ -390,7 +427,7 @@ slate.fullDataHandler = function(e) {
 slate.organizeData = function(){
 
     //this is the stable marriage implementation
-    slate.matches = optimalMatch.organizeData([])
+    slate.matches = optimalMatch.organizeData([],slate.mustFills)
     console.log(slate.matches);
     let stats = optimalMatch.score(slate.matches)
     //slate.matches = stats.summary
@@ -421,27 +458,11 @@ slate.organizeData = function(){
 
 
 slate.reRun = function(){
-    var lockins = {}
-    //find out who is locked in
-    for(let i=0;i<buildPeople.people.length;i++){
-        let thisName = buildPeople.people[i].name;
-
-        let lockedIn = $("#"+thisName+"-lockedIn").is(':checked')
-        if(!lockedIn){
-            buildPeople.people[i].lockedIn = false;
-            continue;
-        }
-        else{
-            buildPeople.people[i].lockedIn = true;
-            lockins[thisName] = $("#"+thisName+"-billet").val()
-        }       
-    }
-
-    console.log(lockins)
 
 
 
-    slate.matches = optimalMatch.organizeData(lockins)
+
+    slate.matches = optimalMatch.organizeData(slate.lockins,slate.mustFills)
     let stats = optimalMatch.score(slate.matches)
     //slate.matches = stats.summary
     slate.stats = {avg:stats.avg,over3:stats.over3}
