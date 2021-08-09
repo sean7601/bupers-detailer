@@ -331,6 +331,7 @@ slate.readFile = function(evt){
 
 slate.fullDataHandler = function(e) {
     slate.mustFills = [];
+    slate.lockins = [];
     var files = e.target.files; // FileList object
     f = files[0];
     let extension = files[0].name.split('.').pop().toLowerCase()
