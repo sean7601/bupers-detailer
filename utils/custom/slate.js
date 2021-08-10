@@ -358,13 +358,22 @@ slate.fullDataHandler = function(e) {
         var sheet = workbook.SheetNames[0];
         data = XLSX.utils.sheet_to_json(workbook.Sheets[sheet]);
 
-
+        let type = "MPRF"
+        if(data[0].SQUADRON.includes("HSM")){
+            type = "HSM"
+        }
         for(var i=0;i<data.length;i++){
             
             let person = {};
             let lastName =data[i].NAME.split(",")[0]
             let desig = data[i].NAME.split("-")[1] 
-            person.name = lastName + "-" + desig + "-" + data[i].SQUADRON.replace(/[^a-zA-Z]+/g, '');
+            if(type == "MPRF"){
+                person.name = lastName + "-" + desig + "-" + data[i].SQUADRON.replace(/[^a-zA-Z]+/g, '');
+            }
+            else if(type == "HSM"){
+                person.name = lastName;
+            }
+            
             person.breakout = data[i].Breakout;
             person.notes = data[i].Notes;
             person.lockedIn = false;
