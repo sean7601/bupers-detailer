@@ -172,15 +172,46 @@ optimalMatch.formatResults = function(solution){
 optimalMatch.score = function(matches){
     let data = {};
     let total = 0;
+    let adjustedTotal = 0;
     data.over3 = 0; 
     for(let i=0;i<matches.length;i++){
+        let person = optimalMatch.getPerson(matches[i].name)
+        let adjustedPref = optimalMatch.getAdjustedPrefs(person.preferences,matches[i].pref);
+
         total += matches[i].pref;
+        adjustedTotal += adjustedPref
         if(matches[i].pref > 5){
             data.over3++
         }
     }
     
     data.avg = total/matches.length;
+    data.adjustedAvg = adjustedTotal/matches.length;
     
     return data
+}
+
+
+optimalMatch.getAdjustedPrefs = function(prefs,thePref){
+    let adjusted = [];
+    for(let i=0;i<prefs.length;i++){
+        let pref = parseInt(prefs[i].pref);
+        console.log(pref)
+        if(pref < 9e5){
+            adjusted.push(pref)
+        }
+    }
+
+    adjusted.sort(function(a, b) {
+        return a - b;
+      });
+
+    console.log(adjusted)
+
+    for(let i=0;i<adjusted.length;i++){
+        if(adjusted[i] == thePref){
+            return i+1;
+        }
+    }
+    return null;
 }

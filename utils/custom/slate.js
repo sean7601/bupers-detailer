@@ -177,7 +177,9 @@ slate.buildMustFills = function(){
 slate.writeStats = function(){
     let html = `
         <div>Avg Preference: ${slate.stats.avg}</div>
+        <div>Adjusted Preference: ${slate.stats.adjustedAvg}</div>
         <div>Number with > Fifth Choice: ${slate.stats.over3}</div>
+
         <div class="form-group w-25 text-center">
             <label>Alternative Choice Impact</label>
             <select onchange="slate.getImpactOfChange()" class="form-control"  id="assess-billet-impact-title">`
@@ -528,7 +530,7 @@ slate.organizeData = function(){
     let stats = optimalMatch.score(slate.matches)
     //slate.matches = stats.summary
 
-    slate.stats = {avg:stats.avg,over3:stats.over3}
+    slate.stats = {avg:stats.avg,over3:stats.over3,adjustedAvg:stats.adjustedAvg}
     slate.commands = {};
 
 
@@ -561,7 +563,7 @@ slate.reRun = function(){
     slate.matches = optimalMatch.organizeData(slate.lockins,slate.mustFills)
     let stats = optimalMatch.score(slate.matches)
     //slate.matches = stats.summary
-    slate.stats = {avg:stats.avg,over3:stats.over3}
+    slate.stats = {avg:stats.avg,over3:stats.over3,adjustedAvg:stats.adjustedAvg}
     slate.commands = {};
 
 
