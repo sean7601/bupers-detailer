@@ -47,7 +47,7 @@ optimalMatch.organizeData = function(lockins,mustFill) {
         }
         optimalMatch.people.push(person);
         let prefs = optimalMatch.initializeLarge(optimalMatch.commands.length);
-
+        let props = data[i].properties
         for(let ii = 0; ii < data[i].preferences.length; ii++) {
             let pref = data[i].preferences[ii].pref;
             let billet = data[i].preferences[ii].billet;
@@ -61,10 +61,20 @@ optimalMatch.organizeData = function(lockins,mustFill) {
                     pref = 9e5
                 }
             }
+
+            let reqs = slate.commandReqs[billet];
+            console.log(reqs,props);
             for(let iii=0;iii<quantity;iii++){
                 let index = optimalMatch.findCommandIndex(billet + "--" + iii);
+                let match = optimalMatch.checkPropertyMatch(props,reqs[iii])
                 if(index !== -1) {
-                    prefs[index] = pref;
+                    if(match || lockedIn){
+                        prefs[index] = pref;
+                    }
+                    else{
+                        prefs[index] = 9e5;
+                        console.log("no match");
+                    }
                 }
             }
         }
@@ -103,6 +113,21 @@ optimalMatch.organizeData = function(lockins,mustFill) {
 
     return results
 
+}
+
+optimalMatch.checkPropertyMatch = function(personProps,billetProps){
+    let match = true;
+    for(let i = 0; i < billetProps.length; i++) {
+        let billetVal = billetProps[i].val;
+        let personVal = personProps[billetProps[i].prop];
+        if(billetVal && !personVal){
+            match = false;
+            break;
+        }
+
+    }
+
+    return match;
 }
 
 optimalMatch.getPreference = function(name,billet){

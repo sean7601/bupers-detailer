@@ -11,7 +11,7 @@ slate.enter = function() {
             <input type="file" hidden id="fileUpload"></input>
             <button onclick="slate.writeSlate()" class="btn btn-primary ml-3">View Personnel</button>
             <button onclick="slate.writeCommands()" class="btn btn-primary ml-3">View Commands</button>
-            <button onclick="slate.reRun()" class="btn btn-warning ml-3">Re-Build w/ Lock-Ins</button>
+            <button onclick="slate.reRun()" class="btn btn-warning ml-3">Re-Build</button>
 
             <div class="dropdown">
                 <button class="btn btn-primary dropdown-toggle ml-3" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
@@ -45,6 +45,7 @@ slate.writeCommands = function(){
             <th>Billets Allowed</th>
             <th>Billets Allocated</th>
             <th>Must Fill</th>
+            <th>Req's</th>
             <th>Names</th>
         </tr>
 
@@ -100,6 +101,9 @@ slate.writeCommands = function(){
                 }
             html += `</td>
             <td>
+                <button class="btn btn-secondary ml-3" onclick="slate.getRequirementsUi(${i})">Set</button>
+            </td>
+            <td>
                 ${string}
             </td>
         </tr>
@@ -112,6 +116,52 @@ slate.writeCommands = function(){
 
 }
 
+slate.getRequirementsUi = function(index){
+    let billet = buildPeople.people[0].preferences[index].billet;
+    let reqs = slate.commandReqs[billet];
+    console.log(reqs)
+    let html = `
+        <h3>${billet}</h3>
+        <button class="btn btn-secondary ml-3 mb-3" onclick="slate.writeCommands()">Go Back</button>
+        <table class="table">
+            <tr>
+            <th>#</th>`
+            for(let i=0;i<reqs[0].length;i++){
+                let prop = reqs[0][i];
+                html += `<th>${prop.prop}</th>`
+            }
+            html += `</tr>`
+            for(let i = 0; i < reqs.length; i++){
+                html += `<tr>`
+                html += `<td>${i+1}</td>`
+                for(let ii=0;ii<reqs[i].length;ii++){
+                    let val = reqs[i][ii].val;
+                    html += "<td>"
+                    if(val){
+                        html += `<input class="form-check-input ml-3 mustFill" onclick="slate.storeReqChange(${index},${i},${ii})" type="checkbox" id="${index}-${i}-${ii}-req" checked>`
+                    }
+                    else{
+                        html += `<input class="form-check-input ml-3 mustFill" onclick="slate.storeReqChange(${index},${i},${ii})" type="checkbox" id="${index}-${i}-${ii}-req">`
+                    }
+                    html += "</td>"
+                }
+                html += `</tr>`
+            }
+
+    html += `
+        </table>    
+    `
+    $("#slate").html(html);
+}
+
+slate.storeReqChange = function(billetIndex,reqIndex,propIndex){
+    let billet = buildPeople.people[0].preferences[billetIndex].billet;
+    let reqs = slate.commandReqs[billet];
+    let val = $(`#${billetIndex}-${reqIndex}-${propIndex}-req`).is(":checked"); 
+    console.log(reqs,val,reqIndex,propIndex,reqs[reqIndex][propIndex])
+    reqs[reqIndex][propIndex].val = val
+
+}
 slate.buildMustFills = function(){
     slate.mustFills = [];
     for(let i = 0; i < buildPeople.people[0].preferences.length; i++){
@@ -298,7 +348,7 @@ slate.load = function(){
 }
 
 slate.downloadJson = function(){
-    var data = {people:buildPeople.people,matches:slate.matches,lockins:slate.lockins,mustFills:slate.mustFills};
+    var data = {people:buildPeople.people,matches:slate.matches,lockins:slate.lockins,mustFills:slate.mustFills,commandReqs:slate.commandReqs};
     let exportName = "savedSlate"
     var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
     var downloadAnchorNode = document.createElement('a');
@@ -332,6 +382,7 @@ slate.readFile = function(evt){
 slate.fullDataHandler = function(e) {
     slate.mustFills = [];
     slate.lockins = [];
+    slate.commandReqs = {};
     var files = e.target.files; // FileList object
     f = files[0];
     let extension = files[0].name.split('.').pop().toLowerCase()
@@ -349,6 +400,8 @@ slate.fullDataHandler = function(e) {
             slate.stats = {avg:5,over3:5};
             slate.mustFills = data.mustFills
             slate.lockins = data.lockins
+            slate.commandReqs = data.commandReqs
+            
             
             slate.writeSlate()
             slate.reRun()
@@ -411,7 +464,18 @@ slate.fullDataHandler = function(e) {
             delete data[i]["Summary Group"];
 
             person.preferences = [];
+            person.properties = {};
             for(let prop in data[i]){
+                //add in peoples property
+                if(prop.includes("*PROP-")){
+                    let propShort = prop.replace("*PROP-", "");
+                    person.properties[propShort] = false;
+                    if(data[i][prop] == "Y"){
+                        person.properties[propShort] = true;
+                    }
+    
+                    continue;
+                }
                 let propArray = prop.split(" ");
                 let quantity = parseInt(propArray[propArray.length-1]);
                 if(isNaN(quantity) || quantity == 60 || quantity == 6060){
@@ -422,6 +486,8 @@ slate.fullDataHandler = function(e) {
                     pref = 9e5;
                 }
                 person.preferences.push({billet:prop,pref:pref,quantity:quantity})
+
+                
             }
 
             person.preferences.sort((a, b) => (a.pref > b.pref) ? 1 : -1)
@@ -429,7 +495,25 @@ slate.fullDataHandler = function(e) {
 
         }
 
+        //build the command requirements datastructure
+        for(let ii=0;ii<buildPeople.people[0].preferences.length;ii++){
+            let pref = buildPeople.people[0].preferences[ii];
+            slate.commandReqs[pref.billet] = [];
+            let reqs = [];
+            for(let prop in buildPeople.people[0].properties){
+                let req = {};
+                req.prop = prop;
+                req.val = false;
+                reqs.push(req);
+            }
+            for(let iii=0;iii<pref.quantity;iii++){
+                slate.commandReqs[pref.billet].push(JSON.parse(JSON.stringify(reqs)))
+            }
+            
+        }
 
+        console.log(slate.commandReqs);
+        console.log(buildPeople);
         slate.organizeData()
 	}
   if(rABS) reader.readAsBinaryString(f); else reader.readAsArrayBuffer(f);
