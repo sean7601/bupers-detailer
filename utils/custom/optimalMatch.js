@@ -5,7 +5,7 @@ let optimalMatch = {};
 optimalMatch.initializeLarge = function(size){
     let array = [];
     for(let i = 0; i < size; i++) {
-        array.push(9e5);
+        array.push(9e30);
     }
     return array;
 }
@@ -21,10 +21,36 @@ optimalMatch.findCommandIndex = function(command){
     return index;
 }
 
-optimalMatch.organizeData = function(lockins,mustFill) {
 
+//ten is best,one is worst
+optimalMatch.scorePeopleFromOneToTen = function(people,rankFactor){
 
+    //get min and max score
+    let min = 9e30
+    let max  = -9e30
+    for(let i=0;i<people.length;i++){
+        let score = people[i].score;
+        if(score < min){
+            min = score;
+        }
+        if(score > max){
+            max = score;
+        }
+    }
+
+    let range = max - min;
+    for(let i=0;i<people.length;i++){
+        people[i].score = (max - people[i].score)/range * (rankFactor-1) + 1;
+    }
+
+    return people;
+}   
+
+optimalMatch.organizeData = function(lockins,mustFill,rankFactor) {
+    console.log(rankFactor);
     let data = JSON.parse(JSON.stringify(buildPeople.people));
+    data = optimalMatch.scorePeopleFromOneToTen(data,rankFactor)
+    console.log(data)
     optimalMatch.matchData = [];
 
     //add all the billets
@@ -58,21 +84,20 @@ optimalMatch.organizeData = function(lockins,mustFill) {
                     pref = 0;
                 }
                 else{
-                    pref = 9e5
+                    pref = 9e30
                 }
             }
 
             let reqs = slate.commandReqs[billet];
-            console.log(reqs,props);
             for(let iii=0;iii<quantity;iii++){
                 let index = optimalMatch.findCommandIndex(billet + "--" + iii);
                 let match = optimalMatch.checkPropertyMatch(props,reqs[iii])
                 if(index !== -1) {
                     if(match || lockedIn){
-                        prefs[index] = pref;
+                        prefs[index] = pref * data[i].score;
                     }
                     else{
-                        prefs[index] = 9e5;
+                        prefs[index] = 9e30;
                         console.log("no match");
                     }
                 }
@@ -91,7 +116,7 @@ optimalMatch.organizeData = function(lockins,mustFill) {
             let quantity = data[0].preferences[ii].quantity;
             let thisPref = 0;
             if(mustFill.includes(data[0].preferences[ii].billet)){
-                thisPref = 9e5;
+                thisPref = 9e30;
             }
             for(let iii=0;iii<quantity;iii++){
                 //pushing 0 here means that the dummy person can fill any of these and the billet is not a mando fill
@@ -105,8 +130,8 @@ optimalMatch.organizeData = function(lockins,mustFill) {
 
     console.log(optimalMatch)
     
-
     let solution = computeMunkres(optimalMatch.matchData);
+    console.log(solution);
     let results = optimalMatch.formatResults(solution,data);
     console.log(results);
 
@@ -196,8 +221,7 @@ optimalMatch.getAdjustedPrefs = function(prefs,thePref){
     let adjusted = [];
     for(let i=0;i<prefs.length;i++){
         let pref = parseInt(prefs[i].pref);
-        console.log(pref)
-        if(pref < 9e5){
+        if(pref < 9e30){
             adjusted.push(pref)
         }
     }
@@ -206,7 +230,6 @@ optimalMatch.getAdjustedPrefs = function(prefs,thePref){
         return a - b;
       });
 
-    console.log(adjusted)
 
     for(let i=0;i<adjusted.length;i++){
         if(adjusted[i] == thePref){

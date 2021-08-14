@@ -193,8 +193,8 @@ slate.getImpactOfChange = function(){
     for(let i = 0; i < buildPeople.people.length; i++){
         let person = buildPeople.people[i];
         let currentMatch = $("#"+person.name+"-billet").val();
-        let impactPref = 9e5;
-        let currentPref = 9e5
+        let impactPref = 9e30;
+        let currentPref = 9e30
         //find the pref of this billet and of the current billet
         for(let ii = 0; ii < person.preferences.length; ii++){
             let pref = person.preferences[ii];
@@ -221,7 +221,7 @@ slate.getImpactOfChange = function(){
             text = "<span>No Change</span>"
         }
 
-        if(impactPref == 9e5){
+        if(impactPref == 9e30){
             text = "<span style='color:red;'>Unqualified</span>"
         }
         $("#"+person.name+"-impact").html(text);
@@ -351,7 +351,7 @@ slate.fullDataHandler = function(e) {
                 }
                 let pref = data[i][prop];
                 if(pref == "n"){
-                    pref = 9e5;
+                    pref = 9e30;
                 }
                 person.preferences.push({billet:prop,pref:pref,quantity:quantity})
             }

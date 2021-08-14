@@ -290,7 +290,7 @@ buildPeople.fullDataHandler = function(e) {
                 }
                 let pref = data[i][prop];
                 if(isNaN(pref)){
-                    pref = 9e5;
+                    pref = 9e30;
                 }
                 person.preferences.push({billet:prop,pref:pref,quantity:quantity})
             }

@@ -113,7 +113,7 @@ slate.writeCommands = function(){
     }
     html += "</table>"
     $("#slate").html(html);
-
+    slate.recordImpactSlider = $("#rankImportSlider").slider();
 }
 
 slate.getRequirementsUi = function(index){
@@ -176,24 +176,44 @@ slate.buildMustFills = function(){
 
 slate.writeStats = function(){
     let html = `
-        <div>Avg Preference: ${slate.stats.avg}</div>
-        <div>Adjusted Preference: ${slate.stats.adjustedAvg}</div>
+        <div>Avg Preference: ${Math.round(100*slate.stats.avg)/100}</div>
+        <div>Adjusted Preference: ${Math.round(100*slate.stats.adjustedAvg)/100}</div>
         <div>Number with > Fifth Choice: ${slate.stats.over3}</div>
-
-        <div class="form-group w-25 text-center">
-            <label>Alternative Choice Impact</label>
-            <select onchange="slate.getImpactOfChange()" class="form-control"  id="assess-billet-impact-title">`
-            let person = buildPeople.people[0]
-            for(let i = 0; i < person.preferences.length; i++){
-                let theBillet = person.preferences[i].billet;
-                html += `<option value="${theBillet}">${theBillet}</option>`
-            }
-            html += `</select>
+        <hr>
+        <div class="row"> 
+            <div class="form-group col-4 text-center">
+                <label>Alternative Choice Impact</label>
+                <select onchange="slate.getImpactOfChange()" class="form-control"  id="assess-billet-impact-title">`
+                let person = buildPeople.people[0]
+                for(let i = 0; i < person.preferences.length; i++){
+                    let theBillet = person.preferences[i].billet;
+                    html += `<option value="${theBillet}">${theBillet}</option>`
+                }
+                html += `</select>
+            </div>
+            <div class="form-group col-4 text-center">
+                <label>Importance of Record (x Pref)</label></br>
+                <input id="rankImportSlider" 
+                onchange="slate.updateRecordImpact()"
+                data-slider-min="1"
+                data-slider-max="100"
+                data-slider-step="1"
+                data-slider-value="${slate.recordImpact}"
+                </input>
+            </div>
         </div>
+
     
     `
     return html
 
+    
+
+}
+
+slate.updateRecordImpact = function(){
+    let val = slate.recordImpactSlider.slider('getValue');
+    slate.recordImpact = val;
 }
 
 slate.findMatchByPersonName = function(name){
@@ -243,9 +263,14 @@ slate.writeSlate = function(){
                     }
                 html += `</select>
             </td>
-            <td>
-                ${theMatch.pref}
-            </td>
+            <td>`
+            if(theMatch.pref > 5){
+                html += "<span style='color:red'><b>"+theMatch.pref+"</b></span>"
+            }
+            else{
+                html += theMatch.pref
+            }
+            html += `</td>
             <td>`
                 if(person.lockedIn){
                     html += `<input class="form-check-input ml-3" onclick="slate.saveLockins()"  type="checkbox" id="${person.name}-lockedIn" checked>`
@@ -270,6 +295,7 @@ slate.writeSlate = function(){
 
     slate.setToBilletedJob()
     slate.getImpactOfChange();
+    slate.recordImpactSlider = $("#rankImportSlider").slider();
 
 }
 
@@ -300,8 +326,8 @@ slate.getImpactOfChange = function(){
     for(let i = 0; i < buildPeople.people.length; i++){
         let person = buildPeople.people[i];
         let currentMatch = $("#"+person.name+"-billet").val();
-        let impactPref = 9e5;
-        let currentPref = 9e5
+        let impactPref = 9e30;
+        let currentPref = 9e30
         //find the pref of this billet and of the current billet
         for(let ii = 0; ii < person.preferences.length; ii++){
             let pref = person.preferences[ii];
@@ -328,7 +354,7 @@ slate.getImpactOfChange = function(){
             text = "<span>No Change</span>"
         }
 
-        if(impactPref == 9e5){
+        if(impactPref == 9e30){
             text = "<span style='color:red;'>Unqualified</span>"
         }
         $("#"+person.name+"-impact").html(text);
@@ -382,6 +408,7 @@ slate.readFile = function(evt){
 
 
 slate.fullDataHandler = function(e) {
+    slate.recordImpact = 1
     slate.mustFills = [];
     slate.lockins = [];
     slate.commandReqs = {};
@@ -485,7 +512,7 @@ slate.fullDataHandler = function(e) {
                 }
                 let pref = data[i][prop];
                 if(pref == "n"){
-                    pref = 9e5;
+                    pref = 9e30;
                 }
                 person.preferences.push({billet:prop,pref:pref,quantity:quantity})
 
@@ -525,7 +552,7 @@ slate.fullDataHandler = function(e) {
 slate.organizeData = function(){
 
     //this is the stable marriage implementation
-    slate.matches = optimalMatch.organizeData([],slate.mustFills)
+    slate.matches = optimalMatch.organizeData([],slate.mustFills,slate.recordImpact)
     console.log(slate.matches);
     let stats = optimalMatch.score(slate.matches)
     //slate.matches = stats.summary
@@ -560,7 +587,7 @@ slate.reRun = function(){
 
 
 
-    slate.matches = optimalMatch.organizeData(slate.lockins,slate.mustFills)
+    slate.matches = optimalMatch.organizeData(slate.lockins,slate.mustFills,slate.recordImpact)
     let stats = optimalMatch.score(slate.matches)
     //slate.matches = stats.summary
     slate.stats = {avg:stats.avg,over3:stats.over3,adjustedAvg:stats.adjustedAvg}
