@@ -179,6 +179,21 @@ slate.writeStats = function(){
         <div>Avg Preference: ${Math.round(100*slate.stats.avg)/100}</div>
         <div>Adjusted Preference: ${Math.round(100*slate.stats.adjustedAvg)/100}</div>
         <div>Number with > Fifth Choice: ${slate.stats.over3}</div>
+        <table class="table">
+            <tr>
+                <th>Top 20%</th>
+                <th>21%-40%</th>
+                <th>41%-60%</th>
+                <th>61%-80%</th>
+                <th>Bottom 20%</th>
+            </tr>
+            <tr>
+                <td>${Math.round(100*slate.stats.quintiles[0])/100}</td>
+                <td>${Math.round(100*slate.stats.quintiles[1])/100}</td>
+                <td>${Math.round(100*slate.stats.quintiles[2])/100}</td>
+                <td>${Math.round(100*slate.stats.quintiles[3])/100}</td>
+                <td>${Math.round(100*slate.stats.quintiles[4])/100}</td>
+        </table>
         <hr>
         <div class="row"> 
             <div class="form-group col-4 text-center">
@@ -192,12 +207,13 @@ slate.writeStats = function(){
                 html += `</select>
             </div>
             <div class="form-group col-4 text-center">
-                <label>Importance of Record (x Pref)</label></br>
+                <label>Importance of Record</label></br>
                 <input id="rankImportSlider" 
                 onchange="slate.updateRecordImpact()"
                 data-slider-min="1"
-                data-slider-max="100"
+                data-slider-max="10"
                 data-slider-step="1"
+                scale="logarithmic"
                 data-slider-value="${slate.recordImpact}"
                 </input>
             </div>
@@ -354,7 +370,7 @@ slate.getImpactOfChange = function(){
             text = "<span>No Change</span>"
         }
 
-        if(impactPref == 9e30){
+        if(impactPref >= 9e5){
             text = "<span style='color:red;'>Unqualified</span>"
         }
         $("#"+person.name+"-impact").html(text);
@@ -363,7 +379,6 @@ slate.getImpactOfChange = function(){
 }
 
 slate.setToBilletedJob = function(){
-    console.log(slate.matches)
     for(let match in slate.matches){
         let theMatch = slate.matches[match];
         $("#"+theMatch.name+"-billet").val(theMatch.billet);
@@ -426,7 +441,7 @@ slate.fullDataHandler = function(e) {
             console.log(data)
             buildPeople.people = (data.people);
             slate.matches = (data.matches);
-            slate.stats = {avg:5,over3:5};
+            slate.stats = {avg:5,over3:5, quintiles:[5,5,5,5,5]};
             slate.mustFills = data.mustFills
             slate.lockins = data.lockins
             slate.commandReqs = data.commandReqs
@@ -524,6 +539,7 @@ slate.fullDataHandler = function(e) {
 
         }
 
+        buildPeople.people.sort((a, b) => (a.score > b.score) ? 1 : -1)
         //build the command requirements datastructure
         for(let ii=0;ii<buildPeople.people[0].preferences.length;ii++){
             let pref = buildPeople.people[0].preferences[ii];
@@ -557,7 +573,7 @@ slate.organizeData = function(){
     let stats = optimalMatch.score(slate.matches)
     //slate.matches = stats.summary
 
-    slate.stats = {avg:stats.avg,over3:stats.over3,adjustedAvg:stats.adjustedAvg}
+    slate.stats = {avg:stats.avg,over3:stats.over3,adjustedAvg:stats.adjustedAvg,quintiles:stats.quintiles}
     slate.commands = {};
 
 
@@ -590,7 +606,7 @@ slate.reRun = function(){
     slate.matches = optimalMatch.organizeData(slate.lockins,slate.mustFills,slate.recordImpact)
     let stats = optimalMatch.score(slate.matches)
     //slate.matches = stats.summary
-    slate.stats = {avg:stats.avg,over3:stats.over3,adjustedAvg:stats.adjustedAvg}
+    slate.stats = {avg:stats.avg,over3:stats.over3,adjustedAvg:stats.adjustedAvg, quintiles:stats.quintiles}
     slate.commands = {};
 
 

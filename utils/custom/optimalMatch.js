@@ -40,7 +40,9 @@ optimalMatch.scorePeopleFromOneToTen = function(people,rankFactor){
 
     let range = max - min;
     for(let i=0;i<people.length;i++){
-        people[i].score = (max - people[i].score)/range * (rankFactor-1) + 1;
+        //people[i].score = (max - people[i].score)/range * (rankFactor-1) + 1;
+        //this is the exponential version
+        people[i].score = Math.pow((max - people[i].score+.01)/range,(rankFactor-1));
     }
 
     return people;
@@ -88,17 +90,21 @@ optimalMatch.organizeData = function(lockins,mustFill,rankFactor) {
                 }
             }
 
+            if(pref != 9e30){
+                pref = pref * data[i].score;
+            }
+
             let reqs = slate.commandReqs[billet];
             for(let iii=0;iii<quantity;iii++){
                 let index = optimalMatch.findCommandIndex(billet + "--" + iii);
                 let match = optimalMatch.checkPropertyMatch(props,reqs[iii])
                 if(index !== -1) {
                     if(match || lockedIn){
-                        prefs[index] = pref * data[i].score;
+                        prefs[index] = pref
                     }
                     else{
                         prefs[index] = 9e30;
-                        console.log("no match");
+                        //console.log("no match");
                     }
                 }
             }
@@ -128,12 +134,13 @@ optimalMatch.organizeData = function(lockins,mustFill,rankFactor) {
     }
 
 
-    console.log(optimalMatch)
     
     let solution = computeMunkres(optimalMatch.matchData);
-    console.log(solution);
+
+    console.log(solution)
+    console.log(optimalMatch)
+    console.log(optimalMatch.matchData);
     let results = optimalMatch.formatResults(solution,data);
-    console.log(results);
 
 
     return results
@@ -174,6 +181,17 @@ optimalMatch.getPerson = function(name){
     }
 }
 
+optimalMatch.getLocalPersonIndex = function(people,name){
+    // go over people array
+    for(let i=0;i<people.length;i++){
+        if(people[i].name == name){
+            return i;
+        }
+    }
+
+    return -1
+}
+
 optimalMatch.formatResults = function(solution){
     let results = [];
     for(let i = 0; i < solution.length; i++) {
@@ -193,11 +211,26 @@ optimalMatch.formatResults = function(solution){
     return results;
 }
 
+optimalMatch.avg = function (arr){
+    //get the average of the array arr
+    let sum = 0;
+    for(let i=0;i<arr.length;i++){
+        sum += arr[i];
+    }
 
+    return sum / arr.length;
+}
 optimalMatch.score = function(matches){
+    let localPeople = JSON.parse(JSON.stringify(buildPeople.people));
+    localPeople.sort((a, b) => (a.score > b.score) ? 1 : -1)
+    let totalPeople = localPeople.length;
     let data = {};
     let total = 0;
     let adjustedTotal = 0;
+    let quintiles = new Array(5);
+    for(let q=0;q<quintiles.length;q++){
+        quintiles[q] = [];
+    }
     data.over3 = 0; 
     for(let i=0;i<matches.length;i++){
         let person = optimalMatch.getPerson(matches[i].name)
@@ -208,11 +241,19 @@ optimalMatch.score = function(matches){
         if(matches[i].pref > 5){
             data.over3++
         }
+
+        let personIndex = optimalMatch.getLocalPersonIndex(localPeople,matches[i].name);
+        let percentile = Math.floor(personIndex / totalPeople * 5);
+        quintiles[percentile].push(matches[i].pref)
+        
     }
-    
+    //get avg of each quintile
+    for(let q=0;q<quintiles.length;q++){
+        quintiles[q] = optimalMatch.avg(quintiles[q]);
+    }
     data.avg = total/matches.length;
     data.adjustedAvg = adjustedTotal/matches.length;
-    
+    data.quintiles = quintiles;
     return data
 }
 
