@@ -176,11 +176,11 @@ slate.buildMustFills = function(){
 
 slate.writeStats = function(){
     let html = `
-        <div>Avg Preference: ${Math.round(100*slate.stats.avg)/100}</div>
-        <div>Adjusted Preference: ${Math.round(100*slate.stats.adjustedAvg)/100}</div>
         <div>Number with > Fifth Choice: ${slate.stats.over3}</div>
         <table class="table">
             <tr>
+                <th>Stat</th>
+                <th>Total</th>
                 <th>Top 20%</th>
                 <th>21%-40%</th>
                 <th>41%-60%</th>
@@ -188,6 +188,8 @@ slate.writeStats = function(){
                 <th>Bottom 20%</th>
             </tr>
             <tr>
+                <td>Avg Preference</td>
+                <td> ${Math.round(100*slate.stats.avg)/100}</td>
                 <td>${Math.round(100*slate.stats.quintiles[0])/100}</td>
                 <td>${Math.round(100*slate.stats.quintiles[1])/100}</td>
                 <td>${Math.round(100*slate.stats.quintiles[2])/100}</td>
@@ -457,9 +459,9 @@ slate.fullDataHandler = function(e) {
         var sheet = workbook.SheetNames[0];
         data = XLSX.utils.sheet_to_json(workbook.Sheets[sheet]);
 
-        let type = "MPRF"
-        if(data[0].SQUADRON.includes("HSM")){
-            type = "HSM"
+        let type = "HSM"
+        if(data[0].SQUADRON.includes("VP") || data[0].SQUADRON.includes("VQ")){
+            type = "MPRF"
         }
         for(var i=0;i<data.length;i++){
             
