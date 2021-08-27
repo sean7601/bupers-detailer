@@ -125,8 +125,18 @@ optimalMatch.organizeData = function(lockins,mustFill,rankFactor) {
                 thisPref = 9e30;
             }
             for(let iii=0;iii<quantity;iii++){
-                //pushing 0 here means that the dummy person can fill any of these and the billet is not a mando fill
-                prefs.push(thisPref);
+                let mustFillThis = slate.commandReqs[data[0].preferences[ii].billet][iii];
+                mustFillThis = mustFillThis[mustFillThis.length-1].val;
+                if(data[0].preferences[ii].billet.includes("CPRW-10")){
+                    console.log(mustFillThis,iii);
+                }
+                if(mustFillThis){
+                    prefs.push(9e30);
+                }
+                else{
+                    //pushing 0 here means that the dummy person can fill any of these and the billet is not a mando fill
+                    prefs.push(thisPref);
+                }
             }
             
         }
@@ -150,6 +160,9 @@ optimalMatch.organizeData = function(lockins,mustFill,rankFactor) {
 optimalMatch.checkPropertyMatch = function(personProps,billetProps){
     let match = true;
     for(let i = 0; i < billetProps.length; i++) {
+        if(billetProps[i].prop == "Must Fill"){
+            continue;
+        }
         let billetVal = billetProps[i].val;
         let personVal = personProps[billetProps[i].prop];
         if(billetVal && !personVal){

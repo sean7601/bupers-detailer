@@ -38,11 +38,11 @@ slate.enter = function() {
 slate.getAmountOfBilletsAllowed = function(billetName){
     for(let i=0;i<buildPeople.people[0].preferences.length;i++){
         if(buildPeople.people[0].preferences[i].billet == billetName){
-            return buildPeople.people[0].preferences[i].quantity;
+            return {quantity:buildPeople.people[0].preferences[i].quantity,index:i};
         }
 
     }
-    return 0
+    return {quantity:0,index:-1};
 }
 
 slate.writeCommands = function(){
@@ -63,7 +63,9 @@ slate.writeCommands = function(){
 
     for(let i = 0; i < slate.commandOrder.length; i++){
         let theCommand = slate.commandOrder[i]
-        let amountAllowed = slate.getAmountOfBilletsAllowed(theCommand)
+        let index =  slate.getAmountOfBilletsAllowed(theCommand)
+        let amountAllowed = index.quantity;
+        index = index.index;
         let mustFill = false;
         if(slate.mustFills.includes(theCommand)){
             mustFill = true;
@@ -103,14 +105,14 @@ slate.writeCommands = function(){
             </td>
             <td>`
                 if(mustFill){
-                    html += `<input class="form-check-input ml-3 mustFill" onclick="slate.buildMustFills()" type="checkbox" id="${i}-mustFill" checked>`
+                    html += `<input class="form-check-input ml-3 mustFill" onclick="slate.buildMustFills()" type="checkbox" id="${index}-mustFill" checked>`
                 }
                 else{
-                    html += `<input class="form-check-input ml-3 mustFill" onclick="slate.buildMustFills()" type="checkbox" id="${i}-mustFill">`
+                    html += `<input class="form-check-input ml-3 mustFill" onclick="slate.buildMustFills()" type="checkbox" id="${index}-mustFill">`
                 }
             html += `</td>
             <td>
-                <button class="btn btn-secondary ml-3" onclick="slate.getRequirementsUi(${i})">Set</button>
+                <button class="btn btn-secondary ml-3" onclick="slate.getRequirementsUi(${index})">Set</button>
             </td>
             <td>
                 ${string}
@@ -563,6 +565,7 @@ slate.fullDataHandler = function(e) {
                 req.val = false;
                 reqs.push(req);
             }
+            reqs.push({prop:"Must Fill",val:false});
             for(let iii=0;iii<pref.quantity;iii++){
                 slate.commandReqs[pref.billet].push(JSON.parse(JSON.stringify(reqs)))
             }
