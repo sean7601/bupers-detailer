@@ -404,7 +404,7 @@ slate.load = function(){
 }
 
 slate.downloadJson = function(){
-    var data = {people:buildPeople.people,matches:slate.matches,lockins:slate.lockins,mustFills:slate.mustFills,commandReqs:slate.commandReqs};
+    var data = {people:buildPeople.people,matches:slate.matches,lockins:slate.lockins,mustFills:slate.mustFills,commandReqs:slate.commandReqs,commandOrder:slate.commandOrder};
     let exportName = "savedSlate"
     var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
     var downloadAnchorNode = document.createElement('a');
@@ -458,6 +458,7 @@ slate.fullDataHandler = function(e) {
             slate.mustFills = data.mustFills
             slate.lockins = data.lockins
             slate.commandReqs = data.commandReqs
+            slate.commandOrder = data.commandOrder
             
             
             slate.writeSlate()
