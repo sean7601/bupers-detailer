@@ -35,6 +35,15 @@ slate.enter = function() {
 
 }
 
+slate.getAmountOfBilletsAllowed = function(billetName){
+    for(let i=0;i<buildPeople.people[0].preferences.length;i++){
+        if(buildPeople.people[0].preferences[i].billet == billetName){
+            return buildPeople.people[0].preferences[i].quantity;
+        }
+
+    }
+    return 0
+}
 
 slate.writeCommands = function(){
     let html = slate.writeStats()
@@ -52,9 +61,9 @@ slate.writeCommands = function(){
 
     `
 
-    for(let i = 0; i < buildPeople.people[0].preferences.length; i++){
-        let theCommand = buildPeople.people[0].preferences[i].billet;
-        let amountAllowed = buildPeople.people[0].preferences[i].quantity;
+    for(let i = 0; i < slate.commandOrder.length; i++){
+        let theCommand = slate.commandOrder[i]
+        let amountAllowed = slate.getAmountOfBilletsAllowed(theCommand)
         let mustFill = false;
         if(slate.mustFills.includes(theCommand)){
             mustFill = true;
@@ -457,6 +466,7 @@ slate.fullDataHandler = function(e) {
         var workbook = XLSX.read(data, {type: rABS ? 'binary' : 'array', cellStyles: true});
 
         var sheet = workbook.SheetNames[0];
+        
         data = XLSX.utils.sheet_to_json(workbook.Sheets[sheet]);
 
         let type = "HSM"
@@ -562,8 +572,26 @@ slate.fullDataHandler = function(e) {
         console.log(slate.commandReqs);
         console.log(buildPeople);
         slate.organizeData()
+
+
+        slate.commandOrder = slate.getCommmandOrder(buildPeople.people[0].preferences,workbook.Sheets[sheet]);
 	}
   if(rABS) reader.readAsBinaryString(f); else reader.readAsArrayBuffer(f);
+}
+
+slate.getCommmandOrder = function(preferences,sheet){
+    let commandOrder = [];
+    //make an array of excel column names
+    let letters = ["A","B","C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "AA", "AB", "AC", "AD", "AE", "AF", "AG", "AH", "AI", "AJ", "AK", "AL", "AM", "AN", "AO", "AP", "AQ", "AR", "AS", "AT", "AU", "AV", "AW", "AX", "AY", "AZ"];
+    for(let i=0;i<letters.length;i++){
+        let val = sheet[letters[i] + "1"].v;
+        for(let ii=0;ii<preferences.length;ii++){
+            if(val == preferences[ii].billet){
+                commandOrder.push(preferences[ii].billet);
+            }
+        }
+    }
+    return commandOrder
 }
 
 
