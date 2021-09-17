@@ -98,7 +98,7 @@ slate.writeCommands = function(){
                 ${theCommand}
             </td>
             <td>
-                ${numberPeopleBilleted}
+                <input type="number" id="billetQuantity-${i}" oninput="slate.adjustCommandBilletQuantityFromUI(${i})" class="form-control" value="${numberPeopleBilleted}"></input>
             </td>
             <td>
                 ${amountAllowed}
@@ -581,6 +581,45 @@ slate.fullDataHandler = function(e) {
         slate.commandOrder = slate.getCommmandOrder(buildPeople.people[0].preferences,workbook.Sheets[sheet]);
 	}
   if(rABS) reader.readAsBinaryString(f); else reader.readAsArrayBuffer(f);
+}
+
+slate.adjustCommandBilletQuantityFromUI = function(billetIndex){
+    let billet = slate.commandOrder[billetIndex];
+    let quantity = parseInt(document.getElementById("billetQuantity-"+billetIndex).value);
+    slate.adjustCommandBilletQuantity(billet,quantity)
+
+}
+
+slate.adjustCommandBilletQuantity = function(billet,quantity){
+        //adjust command reqs
+        let reqs = [];
+        for(let prop in buildPeople.people[0].properties){
+            let req = {};
+            req.prop = prop;
+            req.val = false;
+            reqs.push(req);
+        }
+        reqs.push({prop:"Must Fill",val:false});
+        slate.commandReqs[billet].length = 0;
+        for(let iii=0;iii<quantity;iii++){
+            slate.commandReqs[billet].push(JSON.parse(JSON.stringify(reqs)))
+        }
+
+
+        //adjust billet quantity within people
+        for(let i=0;i<buildPeople.people.length;i++){
+            let prefs = buildPeople.people[i].preferences;
+            //go over prefs to find the billet
+            for(let ii=0;ii<prefs.length;ii++){
+                if(prefs[ii].billet == billet){
+                    prefs[ii].quantity = quantity;
+                    break;
+                }
+            }
+
+        }
+
+
 }
 
 slate.getCommmandOrder = function(preferences,sheet){
