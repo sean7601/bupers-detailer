@@ -98,10 +98,10 @@ slate.writeCommands = function(){
                 ${theCommand}
             </td>
             <td>
-                <input type="number" id="billetQuantity-${i}" oninput="slate.adjustCommandBilletQuantityFromUI(${i})" class="form-control" value="${numberPeopleBilleted}"></input>
+                <input type="number" id="billetQuantity-${i}" oninput="slate.adjustCommandBilletQuantityFromUI(${i})" class="form-control" value="${amountAllowed}"></input>
             </td>
             <td>
-                ${amountAllowed}
+                ${numberPeopleBilleted}
             </td>
             <td>`
                 if(mustFill){
