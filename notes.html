@@ -1,0 +1,153 @@
+<table class="table table-hover">
+    <thead class="table-light table-striped">
+        <th>Command</th>
+        <th>Location</th>
+        <th>Designator</th>
+        <th>Min ACTC</th>
+        <th>Min Billets</th>
+        <th>Max Billets</th>
+        <th>EFM</th>
+        <th></th>
+
+    </thead>
+    <tbody id="build_commands_table">
+
+    </tbody>
+</table>
+
+
+<form class="w-100">
+    <div class="form-group">
+        <label for="commandName">Command Name</label>
+        <input type="text" class="form-control" id="commandName" placeholder="MPRWS">
+    </div>
+    <div class="form-group">
+        <label for="commandLocation">Command Location</label>
+        <input type="text" class="form-control" id="commandLocation" placeholder="Jacksonville, FL">
+    </div>
+    <div class="form-group">
+        <label for="desiredDesignation">Desired Designator</label>
+        <select class="form-control" id="desiredDesignation">
+            <option>Either</option>
+            <option>NFO</option>
+            <option>Pilot</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="desiredACTC">Prefered ACTC</label>
+        <select class="form-control" id="desiredACTC">
+            <option>None</option>
+            <option>300</option>
+            <option>400I</option>
+            <option>400M</option>
+            <option>500</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="minBillets">Min. Billets</label>
+        <input type="text" class="form-control" id="minBillets">
+    </div>
+    <div class="form-group">
+        <label for="maxBillets">Max. Billets</label>
+        <input type="text" class="form-control" id="maxBillets">
+    </div>
+    <div class="form-group">
+        <label for="efmcategory">EFM Category</label>
+        <select class="form-control" id="efmcategory">
+            <option value="0">None</option>
+            <option value="1">CAT I</option>
+            <option value="2">CAT II</option>
+            <option value="3">CAT III</option>
+            <option value="4">CAT IV</option>
+            <option value="5">CAT V</option>
+            <option value="6">CAT VI</option>
+        </select>
+    </div>
+</form>
+
+
+<button class="btn btn-secondary m-2" onclick="buildCommands.load()">Load Config</button>
+<input type="file" hidden id="fileUpload"></input>
+<div class="dropdown">
+    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown"
+        data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Download
+    </button>
+    <div class="dropdown-menu m-2" aria-labelledby="dropdownMenuButton">
+        <a class="dropdown-item" href="#" onclick="buildCommands.buildPreferenceSheet()">Download Preferences
+            Sheet</a>
+        <a class="dropdown-item" href="#" onclick="buildCommands.saveConfig()">Download
+            Config</a>
+    </div>
+</div>
+
+
+
+<button type="button" class="fab_main_btn bg-primary position-relative color-white" data-toggle="modal"
+    data-target="#main_modal" style="top: 12px; right: -47%;" onclick="toggleModal()">
+    <i class="fas fa-plus"></i>
+</button>
+
+
+
+
+buildPeople.readFile = function (evt) {
+var files = evt.target.files; // FileList object
+f = files[0];
+var reader = new FileReader();
+
+// Closure to capture the file information.
+reader.onload = (function (theFile) {
+return function (e) {
+// Render thumbnail.
+try {
+JsonObj = JSON.parse(e.target.result);
+buildPeople.people = JsonObj;
+buildPeople.writePeople();
+//if this doesn't work, you uploaded an excel file, so do this isntead
+} catch {
+buildPeople.fullDataHandler(e);
+}
+};
+})(f);
+
+// Read in the image file as a data URL.
+reader.readAsText(f);
+};
+
+
+buildPeople.fullDataHandler = function (e) {
+var reader = new FileReader();
+reader.onload = function (e) {
+var data = e.target.result;
+if (!rABS) data = new Uint8Array(data);
+console.log(data);
+var workbook = XLSX.read(data, {
+type: rABS ? 'binary' : 'array',
+cellStyles: true,
+});
+console.log(workbook);
+
+var sheet = workbook.SheetNames[0];
+data = XLSX.utils.sheet_to_json(workbook.Sheets[sheet]);
+
+console.log(data);
+for (var i = 0; i < data.length; i++) { let person={}; person.name=data[i].NAME + '/' + data[i].SQUADRON;
+    person.breakout=data[i].Breakout; person.notes=data[i].Notes; person.prd=data[i]['PRD (YYMM)'];
+    person.summaryGroup=parseInt(data[i]['Summary Group']); let ep=person.breakout.includes('EP'); if (ep) {
+    person.score=parseInt(person.breakout.replace(/\D/g, '' )) / person.summaryGroup; } else { person.score=(6 +
+    parseInt(person.breakout.replace(/\D/g, '' ))) / person.summaryGroup; } person.squadron=data[i].SQUADRON; delete
+    data[i].NAME; delete data[i].Breakout; delete data[i].Notes; delete data[i]['PRD (YYMM)']; delete data[i].rank;
+    delete data[i].SQUADRON; delete data[i]['Summary Group']; person.preferences=[]; for (let prop in data[i]) { let
+    quantity=parseInt(prop.replace(/\D/g, '' )); if (isNaN(quantity) || quantity==60 || quantity==6060) { quantity=1; }
+    let pref=data[i][prop]; if (isNaN(pref)) { pref=9e30; } person.preferences.push({ billet: prop, pref: pref,
+    quantity: quantity, }); } person.preferences.sort((a, b)=> (a.pref > b.pref ? 1 : -1));
+    buildPeople.people.push(person);
+    }
+
+    console.log(buildPeople.people);
+    buildPeople.organizeData();
+    };
+    if (rABS) reader.readAsBinaryString(f);
+    else reader.readAsArrayBuffer(f);
+    };
