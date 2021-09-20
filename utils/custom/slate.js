@@ -443,7 +443,6 @@ slate.fullDataHandler = function(e) {
     var files = e.target.files; // FileList object
     f = files[0];
     let extension = files[0].name.split('.').pop().toLowerCase()
-    console.log(extension)
 
     var reader = new FileReader();
     reader.onload = function(e) {
@@ -451,7 +450,6 @@ slate.fullDataHandler = function(e) {
         var data = e.target.result;
         if(extension == "json"){
             let data = JSON.parse(e.target.result);
-            console.log(data)
             buildPeople.people = (data.people);
             slate.matches = (data.matches);
             slate.stats = {avg:5,over3:5, quintiles:[5,5,5,5,5]};
@@ -480,9 +478,10 @@ slate.fullDataHandler = function(e) {
             
             let person = {};
             let lastName =data[i].NAME.split(",")[0]
+            let firstName = data[i].NAME.split(",")[1]
             let desig = data[i].NAME.split("-")[1] 
             if(type == "MPRF"){
-                person.name = lastName + "-" + desig + "-" + data[i].SQUADRON.replace(/[^a-zA-Z]+/g, '');
+                person.name = lastName + "-" + firstName + "-" + desig + "-" + data[i].SQUADRON.replace(/[^a-zA-Z]+/g, '');
             }
             else if(type == "HSM"){
                 person.name = lastName;
