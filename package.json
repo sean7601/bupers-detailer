@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/sean7601/bupers-detailer#readme",
   "dependencies": {
-    "@fortawesome/fontawesome-free": "^5.15.4"
+    "@fortawesome/fontawesome-free": "^5.15.4",
+    "xlsx-js-style": "^1.0.0"
   }
 }

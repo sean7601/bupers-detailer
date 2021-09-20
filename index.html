@@ -15,6 +15,7 @@
 <!--libraries-->
 <link href="utils/libraries/customCSS.css" rel="stylesheet">
 <script src="utils/libraries/xlsx.full.min.js"></script>
+<script src="utils/libraries/xlsx.min.js"></script>
 <script src="utils/libraries/fileSaver.js"></script>
 <script src="utils/libraries/lap.js"></script>
 <script src="utils/libraries/munkres.js"></script>
@@ -43,7 +44,7 @@
     </div>
 
     <div id="header" class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
-        <h2>Commands</h2>
+        
     </div>
 
     <div id="content" class="container-fluid text-center">
@@ -56,111 +57,7 @@
         </div> -->
 
         <!-- <button class="btn btn-outline-primary" onclick="buildCommands.addCommand('',0,0,0,'')">Add Command</button> -->
-        <div id="people" class="container-fluid">
-            <div class="row border" style="height: calc(90% - 150px);">
-                <div class="col-9 border h-100 table-responsive">
-                    <table class="table table-hover">
-                        <thead class="table-light table-striped">
-                            <th>Command</th>
-                            <th>Location</th>
-                            <th>Designator</th>
-                            <th>Min ACTC</th>
-                            <th>Min Billets</th>
-                            <th>Max Billets</th>
-                            <th>EFM</th>
-                            <th></th>
         
-                        </thead>
-                        <tbody id="build_commands_table">
-        
-                        </tbody>
-                    </table>
-                </div>
-                <div class="col-3  h-100 container-fluid">
-                    <div class="row  justify-content-center align-items-center" style="height: 10%;">
-                        <button class="btn btn-secondary m-2" onclick="buildCommands.load()">Load Config</button>
-                        <input type="file" hidden id="fileUpload"></input>
-                        <div class="dropdown">
-                            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton"
-                                data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                Download
-                            </button>
-                            <div class="dropdown-menu m-2" aria-labelledby="dropdownMenuButton">
-                                <a class="dropdown-item" href="#" onclick="buildCommands.buildPreferenceSheet()">Download
-                                    Preferences
-                                    Sheet</a>
-                                <a class="dropdown-item" href="#" onclick="buildCommands.saveConfig()">Download
-                                    Config</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row " style="height: 80%; overflow-y: scroll;">
-                        <form class="w-100 m-2">
-                            <div class="form-group">
-                                <label for="commandName">Command Name</label>
-                                <input type="text" class="form-control" id="commandName" placeholder="MPRWS">
-                            </div>
-                            <div class="form-group">
-                                <label for="commandLocation">Command Location</label>
-                                <input type="text" class="form-control" id="commandLocation" placeholder="Jacksonville, FL">
-                            </div>
-                            <div class="form-group">
-                                <label for="desiredDesignation">Desired Designator</label>
-                                <select class="form-control" id="desiredDesignation">
-                                    <option selected>Either</option>
-                                    <option>NFO</option>
-                                    <option>Pilot</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="desiredACTC">Prefered ACTC</label>
-                                <select class="form-control" id="desiredACTC">
-                                    <option value="None" selected>None</option>
-                                    <option value="300">300</option>
-                                    <option value="400I">400I</option>
-                                    <option value="400M">400M</option>
-                                    <option value="500">500</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="minBillets">Min. Billets</label>
-                                <input type="text" class="form-control" id="minBillets">
-                            </div>
-                            <div class="form-group">
-                                <label for="maxBillets">Max. Billets</label>
-                                <input type="text" class="form-control" id="maxBillets">
-                            </div>
-                            <div class="form-group">
-                                <label for="efmcategory">EFM Category</label>
-                                <select class="form-control" id="efmcategory">
-                                    <option value="0">None</option>
-                                    <option value="1">CAT I</option>
-                                    <option value="2">CAT II</option>
-                                    <option value="3">CAT III</option>
-                                    <option value="4">CAT IV</option>
-                                    <option value="5">CAT V</option>
-                                    <option value="6">CAT VI</option>
-                                </select>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="row bg-transparent justify-content-end align-items-center" style="height: 10%;">
-                        <button type="button" id="cancel_editing" class="invisible fab_main_btn bg-danger color-white ml-8"
-                            onclick="cancelEdit()">
-                            <i class="fas fa-times"></i>
-                        </button>
-        
-                        <button type="button" class="fab_main_btn bg-primary color-white ml-8" id="add_row_btn"
-                            onclick="buildCommands.addCommand()">
-                            <i class="fas fa-plus"></i>
-                        </button>
-        
-        
-                    </div>
-                </div>
-            </div>
-        
-        </div>
     </div>
     </div>
 
@@ -174,7 +71,7 @@
 </body>
 <script>
     mainPage.enter()
-
+    
     /*
     datastructures
         buildPeople.people has all the data from people

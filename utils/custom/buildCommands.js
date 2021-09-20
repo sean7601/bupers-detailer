@@ -3,8 +3,8 @@ let buildCommands = new Object();
 buildCommands.tableBody = null;
 
 buildCommands.commands = [
-	['MPRWS', 'Jacksonville, FL', 'NFO', '400I', 1, 2, 0],
-	['MPRWS', 'Jacksonville, FL', 'NFO', '500', 1, 2, 0],
+	['MPRWS', 'Jacksonville, FL', 'NFO', '400I', 1, 2, 0, ''],
+	['MPRWS', 'Jacksonville, FL', 'NFO', '500', 1, 2, 0, ''],
 ];
 buildCommands.headers = [
 	'commandName',
@@ -14,6 +14,7 @@ buildCommands.headers = [
 	'minBillets',
 	'maxBillets',
 	'efmcategory',
+	'extraDetails',
 ];
 
 buildCommands.tableState = {
@@ -41,6 +42,7 @@ buildCommands.initCommands = function () {
                             <th>Min Billets</th>
                             <th>Max Billets</th>
                             <th>EFM</th>
+							<th>Extra Details</th>
                             <th></th>
 
                         </thead>
@@ -117,6 +119,10 @@ buildCommands.initCommands = function () {
                                     <option value="6">CAT VI</option>
                                 </select>
                             </div>
+							<div class="form-group">
+                                <label for="extraDetails">Extra Details</label>
+                                <textarea  class="form-control" rows=10 id="extraDetails"></textarea>
+                            </div>
                         </form>
                     </div>
                     <div class="row bg-transparent justify-content-end align-items-center" style="height: 10%;">
@@ -149,13 +155,30 @@ buildCommands.writeCommands = function () {
 	} else {
 		const html = buildCommands.commands.reduce((prev, curr, i) => {
 			return (prev += `<tr data-table-row=1 onclick="buildCommands.editRow(${i})">
-                        <td ondblclick="buildCommands.editCell(this)" oninput="buildCommands.saveCellChange(this, ${i}, 0)" data-table-cell = 0>${curr[0]}</td>
-                        <td ondblclick="buildCommands.editCell(this)" oninput="buildCommands.saveCellChange(this, ${i}, 1)" data-table-cell = 1>${curr[1]}</td>
-                        <td ondblclick="buildCommands.editCell(this)" oninput="buildCommands.saveCellChange(this, ${i}, 2)" data-table-cell = 2>${curr[2]}</td>
-                        <td ondblclick="buildCommands.editCell(this)" oninput="buildCommands.saveCellChange(this, ${i}, 3)" data-table-cell = 3>${curr[3]}</td>
-                        <td ondblclick="buildCommands.editCell(this)" oninput="buildCommands.saveCellChange(this, ${i}, 4)" data-table-cell = 4>${curr[4]}</td>
-                        <td ondblclick="buildCommands.editCell(this)" oninput="buildCommands.saveCellChange(this, ${i}, 5)" data-table-cell = 5>${curr[5]}</td>
-                        <td ondblclick="buildCommands.editCell(this)" oninput="buildCommands.saveCellChange(this, ${i}, 6)" data-table-cell = 6>${curr[6]}</td>
+                        <td ondblclick="buildCommands.editCell(this)" ontextarea="buildCommands.saveCellChange(this, ${i}, 0)" data-table-cell = 0>${
+				curr[0]
+			}</td>
+                        <td ondblclick="buildCommands.editCell(this)" oninput="buildCommands.saveCellChange(this, ${i}, 1)" data-table-cell = 1>${
+				curr[1]
+			}</td>
+                        <td ondblclick="buildCommands.editCell(this)" oninput="buildCommands.saveCellChange(this, ${i}, 2)" data-table-cell = 2>${
+				curr[2]
+			}</td>
+                        <td ondblclick="buildCommands.editCell(this)" oninput="buildCommands.saveCellChange(this, ${i}, 3)" data-table-cell = 3>${
+				curr[3]
+			}</td>
+                        <td ondblclick="buildCommands.editCell(this)" oninput="buildCommands.saveCellChange(this, ${i}, 4)" data-table-cell = 4>${
+				curr[4]
+			}</td>
+                        <td ondblclick="buildCommands.editCell(this)" oninput="buildCommands.saveCellChange(this, ${i}, 5)" data-table-cell = 5>${
+				curr[5]
+			}</td>
+                        <td ondblclick="buildCommands.editCell(this)" oninput="buildCommands.saveCellChange(this, ${i}, 6)" data-table-cell = 6>${
+				curr[6]
+			}</td>
+						<td style = " max-width: 160px; word-wrap:break-word;"ondblclick="buildCommands.editCell(this)" oninput="buildCommands.saveCellChange(this, ${i}, 7)" data-table-cell = 7>${
+				curr[7] === '' || curr[7] === undefined ? 'None' : curr[7]
+			}</td>
                         <td data-noedit='true'>
                             <div class="d-flex align-items-center">
                                 <span class="text-danger ml-2 mr-4 " style="font-size: 1.5rem;" data-row-delete=1
@@ -224,6 +247,7 @@ buildCommands.buildPreferenceSheet = function () {
 	//add personal data
 	let ws_data = [
 		[
+			'Rank',
 			'First Name',
 			'Last Name',
 			'Designator',
@@ -235,19 +259,27 @@ buildCommands.buildPreferenceSheet = function () {
 			'Extra Details',
 		],
 	];
+
 	let ws = XLSX.utils.aoa_to_sheet(ws_data, { header: 0 });
+	ws['!col'] = {
+		wch: 84,
+	};
 	XLSX.utils.book_append_sheet(wb, ws, 'Personal Details');
+	console.log(wb);
 
 	//add preferences
 	ws_data = [
 		[
 			'Command',
 			'Location',
-			'ACTC',
+			'Min. ACTC',
 			`Rank (1-${buildCommands.commands.length})`,
 			'Unable due to EFM (yes,no)',
+			'Available Billets',
 		],
 	];
+	console.log(ws);
+
 	//add each command to the sheet
 	for (let i = 0; i < buildCommands.commands.length; i++) {
 		let efmCat;
@@ -262,6 +294,7 @@ buildCommands.buildPreferenceSheet = function () {
 			buildCommands.commands[i].minACTC,
 			'', // leaving this blank for now
 			efmCat,
+			parseInt(buildCommands.commands[i].maxBillets),
 		]);
 		console.log(ws_data);
 	}
@@ -269,6 +302,8 @@ buildCommands.buildPreferenceSheet = function () {
 	XLSX.utils.book_append_sheet(wb, ws, 'Individual Preferences');
 
 	console.log(wb);
+	ws = wb.Sheets;
+	console.log(ws);
 
 	XLSX.writeFile(wb, 'slate_preferences.xlsx');
 };
@@ -277,8 +312,7 @@ buildCommands.deleteRow = function (i) {
 	if (buildCommands.commands.length <= 1) {
 		buildCommands.commands = [];
 	} else {
-		const newData = buildCommands.commands.splice(i, 1);
-		buildCommands.commands = newData;
+		buildCommands.commands.splice(i, 1);
 	}
 	buildCommands.writeCommands();
 };
@@ -378,6 +412,7 @@ buildCommands.reshapeData = function () {
 				minBillets: entry[4],
 				maxBillets: entry[5],
 				efmCat: entry[6],
+				extraDetails: entry[7],
 			};
 
 			values.push(obj);
@@ -392,6 +427,7 @@ buildCommands.reshapeData = function () {
 				entry.minBillets,
 				entry.maxBillets,
 				entry.efmCat,
+				entry.extraDetails,
 			];
 			values.push(arr);
 		}

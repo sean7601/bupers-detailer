@@ -17,7 +17,7 @@ html {
 	overflow-y: scroll;
 }
 
-right {
+.right {
 	height: 100%;
 	background-color: #f1c40f;
 	text-align: center;
@@ -27,6 +27,10 @@ right {
 	right: 0;
 	overflow-y: scroll;
 	width: 25%;
+}
+
+.td {
+	white-space: normal !important;
 }
 
 .filter {

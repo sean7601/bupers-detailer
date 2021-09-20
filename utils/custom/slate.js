@@ -440,6 +440,7 @@ slate.readFile = function (evt) {
 };
 
 slate.fullDataHandler = function (e) {
+	console.log('full data handler');
 	slate.recordImpact = 1;
 	slate.mustFills = [];
 	slate.lockins = [];
@@ -447,7 +448,7 @@ slate.fullDataHandler = function (e) {
 	var files = e.target.files; // FileList object
 	f = files[0];
 	let extension = files[0].name.split('.').pop().toLowerCase();
-	console.log(extension);
+	console.log(extension, 'Extension');
 
 	var reader = new FileReader();
 	reader.onload = function (e) {
