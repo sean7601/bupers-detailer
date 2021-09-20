@@ -484,7 +484,7 @@ slate.fullDataHandler = function(e) {
                 person.name = lastName.trim() + "-" + firstName.trim() + "-" + data[i].SQUADRON.replace(/[^a-zA-Z]+/g, '');
             }
             else if(type == "HSM"){
-                person.name = lastName;
+                person.name = lastName.trim() + "-" + firstName.trim();
             }
             
             person.breakout = data[i].Breakout;
