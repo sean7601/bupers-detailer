@@ -481,7 +481,7 @@ slate.fullDataHandler = function(e) {
             let firstName = data[i].NAME.split(",")[1]
             let desig = data[i].NAME.split("-")[1] 
             if(type == "MPRF"){
-                person.name = lastName + "-" + firstName + "-" + desig + "-" + data[i].SQUADRON.replace(/[^a-zA-Z]+/g, '');
+                person.name = lastName.trim() + "-" + firstName.trim() + "-" + data[i].SQUADRON.replace(/[^a-zA-Z]+/g, '');
             }
             else if(type == "HSM"){
                 person.name = lastName;
