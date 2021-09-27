@@ -1,34 +1,5 @@
 let buildPeople = new Object();
-buildPeople.people = [
-	{
-		header: 'buildPeople',
-		type: 'VP',
-		name: `Lavelle-NFO-VP`,
-		fullName: `Lavelle,Sean`,
-		breakout: null,
-		notes: null,
-		designator: 'NFO',
-		lockedIn: false,
-		prd: null,
-		summaryGroup: null,
-		score: null,
-		squadron: 'MPRWS',
-		uploadedDetails: {
-			efm: 0,
-			notes: [],
-			co_located: 'no',
-			ACTC: 500,
-		},
-		notes: null,
-		preferences: [
-			{
-				billet: `MPRWS / INST req'd / Jacksonville, FL`,
-				pref: 1,
-				quantity: 6,
-			},
-		],
-	},
-];
+buildPeople.people = [];
 
 buildPeople.commands = {
 	"MPRWS / INST req'd / Jacksonville, FL": 'n',
@@ -47,6 +18,8 @@ buildPeople.headers = [
 	'currCommand',
 ];
 buildPeople.enter = function () {
+	console.table(buildPeople.people);
+	console.log(buildPeople.people[0]);
 	//build intiial UI
 	let html = `
         <div id="people" class="container-fluid">
@@ -91,7 +64,7 @@ buildPeople.enter = function () {
                             <div class="dropdown-menu m-2" aria-labelledby="dropdownMenuButton">
                                 <a class="dropdown-item" href="#" onclick="buildPeople.writeCommandPreferenceSheet()">Command Summary Sheet</a>
                                 <a class="dropdown-item" href="#" onclick="alert('Needs to be implemented')">Command Approval Sheet</a>
-                                <a class="dropdown-item" href="#" onclick="alert('Needs to be implemented')">Config File</a>
+                                <a class="dropdown-item" href="#" onclick="buildPeople.saveConfig()">Config File</a>
                             </div>
                         </div>
                     </div>
@@ -156,16 +129,20 @@ buildPeople.writePeople = function () {
 		return (prev += `
 			<tr data-table-row = ${i} onclick="buildPeople.editRow(${i})">
 				<td ondblclick="buildPeople.editCell(this)" oninput="buildPeople.editRow(${i})" data-table-cell=4>${
-			curr.type === null ? 'unk' : curr.type
+			curr.type ? curr.type : curr.squadron.match(/VP|VQ|MPRWS|CPRW/g).join('')
 		} </td>
 				<td ondblclick="buildPeople.editCell(this)" oninput="buildPeople.editRow(${i})" data-table-cell=4>${
-			curr.fullName.split(',')[0]
+			curr.fullName ? curr.fullName.split(',') : curr.name.split('-')[0]
 		} </td>
 				<td ondblclick="buildPeople.editCell(this)" oninput="buildPeople.editRow(${i})" data-table-cell=4>${
-			curr.fullName.split(',')[1]
+			curr.fullName ? curr.fullName.split(',') : 'UNK'
 		} </td>
 				<td ondblclick="buildPeople.editCell(this)" oninput="buildPeople.editRow(${i})" data-table-cell=4>${
 			curr.designator
+				? curr.designator
+				: curr.properties['NFO']
+				? 'NFO'
+				: 'PILOT'
 		}</td>
 				<td ondblclick="buildPeople.editCell(this)" oninput="buildPeople.editRow(${i})" data-table-cell=4>${
 			curr.squadron
@@ -324,6 +301,8 @@ buildPeople.formatReadData = function () {
 		let lastName = personalData['Last Name'];
 		let designator = personalData['Designator'];
 		let command = personalData['Current Command'];
+		let efm = personalData.uploadedDetails.efm;
+		let collocated = personalData.uploadedDetails.co_located;
 
 		let type = 'HSM';
 		if (command.match(/VP|VQ|MPRWS|CPRW/g)) {
@@ -337,7 +316,7 @@ buildPeople.formatReadData = function () {
 			designator: designator,
 			fullName: `${lastName},${fName}`,
 			breakout: null,
-			notes: null,
+			notes: `${1}/${2}/${3}`,
 			lockedIn: false,
 			prd: null,
 			summaryGroup: null,
@@ -539,28 +518,38 @@ buildPeople.writeCommandPreferenceSheet = function () {
 	}
 
 	ws_data[0].push('Notes');
-
+	console.log(buildPeople.people[0]);
 	for (let person of buildPeople.people) {
 		const row = [
-			'', // Rank
+			person.rank | '', // Rank
 			person.name,
 			person.squadron,
-			'', //PRD
-			'', // Breakout
-			'', // Summary Group
+			person.prd | '', //PRD
+			person.breakout | '', // Breakout
+			person.summaryGroup | '', // Summary Group
 		];
 
 		for (let prop of properties) {
-			if (prop === 'NFO' && person.designator.toUpperCase() === 'NFO') {
-				row.push('Y');
-			} else if (
-				prop === 'PILOT' &&
-				person.designator.toUpperCase() === 'PILOT'
-			) {
-				row.push('Y');
+			if (person.hasOwnProperty('designator')) {
+				if (prop === 'NFO' && person.designator.toUpperCase() === 'NFO') {
+					row.push('Y');
+				} else if (
+					prop === 'PILOT' &&
+					person.designator.toUpperCase() === 'PILOT'
+				) {
+					row.push('Y');
+				} else {
+					row.push('');
+				} // Empty String for now until we figure out the shape of the final data and the methods for which they come into the applications
 			} else {
-				row.push('');
-			} // Empty String for now until we figure out the shape of the final data and the methods for which they come into the applications
+				if (prop === 'NFO' && person.properties['NFO']) {
+					row.push('Y');
+				} else if (prop === 'PILOT' && person.properties['PILOT']) {
+					row.push('Y');
+				} else {
+					row.push('');
+				} // Empty String for now until we figure out the shape of the final data and the methods for which they come into the applications
+			}
 		}
 		const commandsCopy = Object.assign({}, buildPeople.commands);
 
@@ -584,12 +573,24 @@ buildPeople.writeCommandPreferenceSheet = function () {
 		console.warn(
 			'BUILD PEOPLE WRITE COMMAND PREFERENCES SHEET: The properties pushed to the Excel document are hard coded to a empty string. Fix this before distro. '
 		);
-		console.log(ws_data[0], row);
-		row.push(
-			`${priOneCommandName.split('/')[0]}/${
-				person.uploadedDetails.co_located === 'no' ? 'N' : 'Y'
-			}/${person.uploadedDetails.efm === 0 ? 'N' : person.uploadedDetails.efm}`
-		);
+
+		let note;
+		if (person.hasOwnProperty('uploadedDetails')) {
+			note = `${priOneCommandName.split('/')[0]}/${
+				person.uploadedDetails.co_located
+					? person.uploadedDetails.co_located.toUpperCase()
+					: ''
+			}/${
+				person.uploadedDetails.efm
+					? person.uploadedDetails.efm === 0
+						? 'N'
+						: 'Y'
+					: ''
+			}`;
+		} else {
+			note = person.note;
+		}
+		row.push(note);
 		ws_data.push(row);
 	}
 

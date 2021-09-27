@@ -134,7 +134,7 @@ slate.writeCommands = function () {
 slate.getRequirementsUi = function (index) {
 	let billet = buildPeople.people[0].preferences[index].billet;
 	let reqs = slate.commandReqs[billet];
-	console.log(reqs);
+	//console.log(reqs);
 	let html = `
         <h3>${billet}</h3>
         <button class="btn btn-secondary ml-3 mb-3" onclick="slate.writeCommands()">Go Back</button>
@@ -172,7 +172,7 @@ slate.storeReqChange = function (billetIndex, reqIndex, propIndex) {
 	let billet = buildPeople.people[0].preferences[billetIndex].billet;
 	let reqs = slate.commandReqs[billet];
 	let val = $(`#${billetIndex}-${reqIndex}-${propIndex}-req`).is(':checked');
-	console.log(reqs, val, reqIndex, propIndex, reqs[reqIndex][propIndex]);
+	//console.log(reqs, val, reqIndex, propIndex, reqs[reqIndex][propIndex]);
 	reqs[reqIndex][propIndex].val = val;
 };
 slate.buildMustFills = function () {
@@ -180,7 +180,7 @@ slate.buildMustFills = function () {
 	for (let i = 0; i < buildPeople.people[0].preferences.length; i++) {
 		let theCommand = buildPeople.people[0].preferences[i].billet;
 		let mustFill = $('#' + i + '-mustFill').is(':checked');
-		console.log(theCommand, mustFill);
+		//console.log(theCommand, mustFill);
 		if (mustFill) {
 			slate.mustFills.push(theCommand);
 		}
@@ -349,7 +349,7 @@ slate.saveLockins = function () {
 };
 
 slate.getImpactOfChange = function () {
-	console.log(slate.matches);
+	//console.log(slate.matches);
 	let impactMatch = $('#assess-billet-impact-title').val();
 	//go over all people
 	for (let i = 0; i < buildPeople.people.length; i++) {
@@ -440,7 +440,7 @@ slate.readFile = function (evt) {
 };
 
 slate.fullDataHandler = function (e) {
-	console.log('full data handler');
+	//console.log('full data handler');
 	slate.recordImpact = 1;
 	slate.mustFills = [];
 	slate.lockins = [];
@@ -486,7 +486,7 @@ slate.fullDataHandler = function (e) {
 		for (var i = 0; i < data.length; i++) {
 			let person = {};
 			let lastName = data[i].NAME.split(',')[0];
-			i < 10 ? console.log(data[i], 'last') : null;
+			//i < 10 ? console.log(data[i], 'last') : null;
 			let desig = data[i].NAME.split('-')[1];
 			if (type == 'MPRF') {
 				person.name =
@@ -585,8 +585,8 @@ slate.fullDataHandler = function (e) {
 			}
 		}
 
-		console.log(slate.commandReqs);
-		console.log(buildPeople);
+		//console.log(slate.commandReqs);
+		//console.log(buildPeople);
 		slate.organizeData();
 
 		slate.commandOrder = slate.getCommmandOrder(
@@ -687,7 +687,7 @@ slate.organizeData = function () {
 		slate.mustFills,
 		slate.recordImpact
 	);
-	console.log(slate.matches);
+	//console.log(slate.matches);
 	let stats = optimalMatch.score(slate.matches);
 	//slate.matches = stats.summary
 
@@ -711,8 +711,8 @@ slate.organizeData = function () {
 	}
 
 	slate.writeSlate();
-	console.log(performance.now() - slate.lastTime);
-	console.log(slate.stats);
+	//console.log(performance.now() - slate.lastTime);
+	//console.log(slate.stats);
 };
 
 slate.reRun = function () {
@@ -765,7 +765,7 @@ slate.writeExcelSlate = function () {
 	let ws = XLSX.utils.aoa_to_sheet(ws_data, { header: 0 });
 	XLSX.utils.book_append_sheet(wb, ws, 'Slate');
 
-	console.log(wb);
+	//console.log(wb);
 
 	XLSX.writeFile(wb, 'slate.xlsx');
 };

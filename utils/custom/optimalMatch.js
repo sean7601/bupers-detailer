@@ -50,10 +50,11 @@ optimalMatch.scorePeopleFromOneToTen = function (people, rankFactor) {
 };
 
 optimalMatch.organizeData = function (lockins, mustFill, rankFactor) {
-	console.log(rankFactor);
+	//console.table(buildPeople.people);
+	//console.log(rankFactor);
 	let data = JSON.parse(JSON.stringify(buildPeople.people));
 	data = optimalMatch.scorePeopleFromOneToTen(data, rankFactor);
-	console.log(data);
+	//console.log(data);
 	optimalMatch.matchData = [];
 
 	//add all the billets
@@ -80,6 +81,7 @@ optimalMatch.organizeData = function (lockins, mustFill, rankFactor) {
 			let pref = data[i].preferences[ii].pref;
 			let billet = data[i].preferences[ii].billet;
 			let quantity = data[i].preferences[ii].quantity;
+			//console.log(quantity, 'QUANTITY');
 
 			if (lockedIn) {
 				if (lockins[person].includes(billet)) {
@@ -96,13 +98,15 @@ optimalMatch.organizeData = function (lockins, mustFill, rankFactor) {
 			let reqs = slate.commandReqs[billet];
 			for (let iii = 0; iii < quantity; iii++) {
 				let index = optimalMatch.findCommandIndex(billet + '--' + iii);
+				//console.table([props, reqs]);
 				let match = optimalMatch.checkPropertyMatch(props, reqs[iii]);
+
 				if (index !== -1) {
 					if (match || lockedIn) {
 						prefs[index] = pref;
 					} else {
 						prefs[index] = 9e30;
-						//console.log("no match");
+						////console.log("no match");
 					}
 				}
 			}
@@ -125,7 +129,7 @@ optimalMatch.organizeData = function (lockins, mustFill, rankFactor) {
 					slate.commandReqs[data[0].preferences[ii].billet][iii];
 				mustFillThis = mustFillThis[mustFillThis.length - 1].val;
 				if (data[0].preferences[ii].billet.includes('CPRW-10')) {
-					console.log(mustFillThis, iii);
+					//console.log(mustFillThis, iii);
 				}
 				if (mustFillThis) {
 					prefs.push(9e30);
@@ -140,9 +144,9 @@ optimalMatch.organizeData = function (lockins, mustFill, rankFactor) {
 
 	let solution = computeMunkres(optimalMatch.matchData);
 
-	console.log(solution);
-	console.log(optimalMatch);
-	console.log(optimalMatch.matchData);
+	//console.log(solution);
+	//console.log(optimalMatch);
+	//console.log(optimalMatch.matchData);
 	let results = optimalMatch.formatResults(solution, data);
 
 	return results;
